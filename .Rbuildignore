@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^\.github$
+^README\.Rmd$
+^assets$
+^data-raw$
+^docs$
+^_to_send$

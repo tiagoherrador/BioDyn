@@ -1,0 +1,387 @@
+---
+title: "BioDyn workflow example"
+author: "Tiago A. Herrador and Carla A. Reati"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{BioDyn workflow example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = FALSE
+)
+```
+
+```{r libraries}
+# Load BioDyn package
+remotes::install_github("tiagoherrador/BioDyn")
+library(BioDyn)
+```
+
+## Introduction
+
+This vignette presents a complete workflow using **BioDyn**.
+
+## Routes 
+
+```{r routes}
+# Retrieve the directory containing example dataset included within the package.
+# All demo files must be downloaded locally from the BioDyn Zenodo repository, and their file paths must be specified manually.
+# Replace "local route" with the local file paths to the downloaded files.
+
+
+occurrence_file <- "local route"
+
+checklist_file <- "local route"
+
+
+
+eco_path <- "local route"
+
+dem <- "local route"
+
+raster_list <- c(
+  bio01 = "local route",
+  bio12 = "local route",
+  Altitude = dem
+)
+
+
+# Optional: Validate that all required files exist using stopifnot() to prevent errors during the workflow.
+
+stopifnot(
+  nzchar(occurrence_file),
+  nzchar(checklist_file),
+  nzchar(eco_path),
+  nzchar(dem),
+  all(nzchar(raster_list))
+)
+
+```
+
+## 1. Load Data and/or Build presence-absence table
+
+```{r load-data}
+
+# Read the occurence dataset.
+
+data_raw <- data.table::fread(
+  occurrence_file,
+  sep = "\t",
+  encoding = "UTF-8"
+)
+
+```
+
+```{r build-data}
+
+# Use build_data() to combine occurrence records and checklists into a unified dataset and create pseudo-absences.
+
+checklists_raw <- build_data(
+  sightings_file  = occurrence_file,
+  checklist_file  = checklist_file,
+  pres_col        = "presence",
+  label_pos       = "Present",
+  label_neg       = "Absent",
+  sep             = "\t",
+)
+```
+
+## 2. Filter by eBird effort
+
+```{r filter-ebird}
+# Using filter_ebird() you can remove duplicated records and filter by max distance, max observers, max duration and/or protocols.
+
+data_ebird <- filter_ebird(
+  data                = data_raw,
+  max_distance_km   = 10,
+  max_observers     = 10,
+  max_duration_min  = 300,
+  protocols = c("Stationary", "Traveling"),
+  drop_duplicates   = TRUE
+)
+
+checklists_ebird <- filter_ebird(
+  data                = checklists_raw,
+  max_distance_km   = 10,
+  max_observers     = 10,
+  max_duration_min  = 300,
+  protocols = c("Stationary", "Traveling"),
+  drop_duplicates   = TRUE
+)
+```
+
+## 3a. Filter by ecoregion
+
+```{r filter-eco}
+# Use filter_ecoregion() to retain records or checklists located within the specified ecoregion boundaries.
+# set buffer_km for a buffer around the polygon.
+# set interactive = FALSE/TRUE for static or interactive map output.  
+
+data_ecoregion <- filter_ecoregion(
+  data                   = data_ebird,
+  eco_path          = eco_path,
+  lat_col              = "LATITUDE",
+  lon_col              = "LONGITUDE",
+  pres_col             = "presence",
+  pres_label           = "Present",
+  buffer_km            = 0,       
+  interactive          = F,
+  title                = "Data filtered by ecoregion"
+)
+```
+
+## 3b. Filter by radius
+
+```{r filter-radius}
+# Use filter_radius() to retain checklists located within a defined radius around presence observations (radius_km).
+# set interactive = FALSE/TRUE for static or interactive map output.
+
+checklists_radius <- filter_radius(
+  data          = checklists_ebird,
+  lat_col     = "LATITUDE",
+  lon_col     = "LONGITUDE",
+  pres_col    = "presence",
+  pres_label  = "Present",
+  radius_km   = 30,
+  interactive = F,
+  title = "Data filtered by radius"
+)
+```
+
+## 3c. Create custom segments
+
+```{r interactive-map}
+# Use create_segments() to visualize occurrence records on an interactive map and define custom spatial segments.
+
+create_segments(
+  data      = data_ecoregion
+)
+```
+
+```{r filter-polygons}
+# Assign records to spatial segments using filter_pol() and the created polygon file.
+
+polygon_path <- "local route"
+
+data_segments <- filter_pol(
+  data           = data_ecoregion,
+  polygon_path   = polygon_path,
+  species_column = "COMMON NAME",
+  output_file    = "data_segments.csv"
+)
+
+checklists_segments <- filter_pol(
+  data           = checklists_radius,
+  polygon_path   = polygon_path,
+  species_column = "COMMON NAME",
+  output_file    = "checklists_segments.csv"
+)
+```
+
+## 4. Extract date + season
+
+```{r seasons}
+# Extract date components using split_dates().
+
+data_seasonal <- split_dates(data_segments)
+data_seasonal <- add_season(data_seasonal)
+
+# Assign ecological seasons to each record using add_season().
+
+checklists_seasonal <- split_dates(checklists_segments)
+checklists_seasonal <- add_season(checklists_seasonal)
+```
+
+## 5. Extract CHELSA and Altitude rasters
+
+```{r rasters}
+# Use extract_rasters() to extract environmental variables from raster layers at each observation location and append the extracted variables to the occurrence dataset.
+
+data_enriched <- extract_rasters(
+  data           = data_seasonal,
+  raster_list = raster_list,
+  out_file    = "data_variables_segments.csv",
+  lon_col     = "LONGITUDE",
+  lat_col     = "LATITUDE"
+)
+
+checklists_enriched <- extract_rasters(
+  data           = checklists_seasonal,
+  raster_list = raster_list,
+  out_file    = "data_variables_eco.csv",
+  lon_col     = "LONGITUDE",
+  lat_col     = "LATITUDE"
+)
+```
+
+## 6. Plot effort
+
+```{r plot-effort}
+# Use plot_effort() to visualize the spatial-temporal distribution of sampling effort.
+
+p <- plot_effort(checklists_seasonal)
+
+```
+
+# 7. Plots data using ggplot library
+
+# 7a. Latitude / Number of records
+
+```{r plots-latitude}
+
+# Density plot of latitudinal distribution of all records
+
+breaks_lat <- seq(-34, -2, by = 2)
+
+ggplot(data_enriched, aes(y = LATITUDE)) +
+  geom_density(aes(x = after_stat(count)), fill = "grey", color = "black", alpha = 0.6) +
+  scale_y_continuous(breaks = breaks_lat) +
+  labs(x = "Number of records", y = "Latitude") +
+  theme_minimal()
+
+# Density plot of latitudinal distribution of records filtered by season
+
+data_season <- data_enriched |>  filter(season %in% c("Summer", "Winter"))
+
+ggplot(data_season, aes(y = LATITUDE, color = season, fill  = season)) +
+  geom_density(aes(x = after_stat(count)), alpha = 0.6) +
+  scale_y_continuous(breaks = breaks_lat) +
+  scale_color_manual(values = c("Summer" = "#009E73", "Winter" = "#0072B2")) +
+  scale_fill_manual(values = c("Summer" = "#009E73", "Winter" = "#0072B2")) +
+  labs(x = "Number of records", y = "Latitude", color = "Season", fill  = "Season") +
+  theme_minimal()
+
+```
+
+# 7b. Proportion of records / months per segment
+
+```{r plots-month-seg}
+
+# Histogram of the monthly variation in records by user-defined segments.
+
+frec_prop_long <- data_enriched |> mutate(MONTH = as.integer(MONTH)) |>  count(Segment, MONTH, name = "n") |>
+  group_by(Segment) |> mutate(prop = n / sum(n)) |>  ungroup()
+
+ggplot(frec_prop_long |> mutate(MONTH = factor(MONTH)), aes(x = MONTH, y = prop, fill = MONTH)) +
+  geom_col(color = "black", alpha = 0.7) +
+  facet_wrap(~ Segment, ncol = 3) +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  labs(x = "Month", y = "Proportion of records") +
+  scale_fill_manual(values = c("1"  = "#009E73", "2"  = "#009E73","3"  = "#F0E442", "4"  = "#F0E442", 
+                               "5"  = "#F0E442", "6"  = "#0072B2", "7"  = "#0072B2", "8"  = "#0072B2",
+                               "9"  = "#CC79A7", "10" = "#CC79A7", "11" = "#CC79A7", "12" = "#009E73")) +
+  theme_minimal() +
+  theme(legend.position = "none", strip.text = element_text(face = "bold"))
+
+```
+
+# 7c. Latitude / seasons per segments
+
+```{r plots-lat-seg}
+
+# Boxplot of seasonal variation in latitude of records by user-defined segments
+
+data_season_seg <- data_seasonal |>  mutate(season = factor(season, levels = c("Spring", "Summer", "Autumn", "Winter")))
+
+ggplot(data_season_seg, aes(x = season, y = LATITUDE, fill = season)) +
+  geom_boxplot(color = "black", alpha = 0.7, outlier.shape = NA) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 2.5,  color = "#D55E00") +
+  facet_wrap(~ Segment, ncol = 2) +
+  scale_fill_manual(values = c("Spring" = "#CC79A7", "Summer" = "#009E73", 
+                               "Autumn" = "#F0E442",  "Winter" = "#0072B2")) +
+  labs(x = "Season",  y = "Latitude") +
+  theme_minimal() +
+  theme(legend.position = "none", strip.text = element_text(face = "bold"))
+
+```
+
+# 7d. Proportion of records / raster layers 
+
+```{r plots-raster}
+
+# Density plot of seasonal distribution of all records across climate variables.
+
+ggplot(data_season, aes(x = bio01, color = season, fill  = season)) +
+  geom_density(alpha = 0.6) +
+  labs(x = "Annual mean temperature (°C)", y = "Proportion of records") +
+  scale_color_manual(values = c("Summer" = "#009E73", "Winter" = "#0072B2")) +
+  scale_fill_manual(values = c("Summer" = "#009E73", "Winter" = "#0072B2")) +
+  theme_minimal()
+
+# Density plot of seasonal distribution of records across climate variables by user-defined segments.
+
+ggplot(data_season, aes( x = bio01, color = season, fill  = season)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ Segment, ncol = 3) +
+  labs(x = "Annual mean temperature (°C)", y = "Proportion of records") +
+  scale_color_manual(values = c("Summer" = "#009E73", "Winter" = "#0072B2")) +
+  scale_fill_manual(values = c("Summer" = "#009E73", "Winter" = "#0072B2")) +
+  theme_minimal()
+
+```
+
+# 7e. Altitude / Number of records
+
+```{r plots-altitude}
+
+# Boxplot of seasonal variation in altitude of records by user-defined segments
+
+data_alt_seg <- data_enriched |>  dplyr::mutate(season = factor(season, levels = c("Spring", "Summer", "Autumn", "Winter")))
+
+ggplot(data_alt_seg, aes(x = season, y = Altitude, fill = season)) +
+  geom_boxplot(color = "black", alpha = 0.7, outlier.shape = NA) +
+  stat_summary(fun = mean, geom = "point",  shape = 18, size = 2.5, color = "#D55E00") + 
+  facet_wrap(~ Segment, ncol = 3) +
+  scale_fill_manual(values = c("Spring" = "#CC79A7", "Summer" = "#009E73", "Autumn" = "#F0E442", "Winter" = "#0072B2")) +
+  labs(x = "Season", y = "Elevation (m a.s.l.)") +
+  theme_minimal() +
+  theme(legend.position = "none", strip.text = element_text(face = "bold"))
+
+
+# Boxplot of seasonal variation in altitude of records by user-defined segments, all in one plot 
+
+elev_table <- elev_minmax(
+  dem            = dem,
+  polygons       = polygon_path,
+  polygon_id_col = "id"
+)
+
+data_alt <- data_enriched |>  mutate(Segment = factor(Segment),  
+                              season  = factor(season, levels = c("Spring", "Summer", "Autumn", "Winter")))
+elev_table2 <- elev_table |> mutate(poly_id = as.character(poly_id))
+elev_table2$seg_num <- match(elev_table2$poly_id, levels(data_alt$Segment))
+seg_half_width <- 0.35
+
+ggplot(data_alt, aes(x = Segment, y = Altitude, fill = season)) +
+  geom_boxplot(width = 0.6, position = position_dodge(width = 0.8), staplewidth = 1, outlier.size = 0.6) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 1.8, color = "#D55E00", position = position_dodge(width = 0.8)) +
+  geom_segment(data = elev_table2, aes(x = seg_num - seg_half_width, xend = seg_num + seg_half_width, y = elev_max, yend = elev_max),
+    inherit.aes = FALSE, colour = "grey60", linewidth = 0.9) +
+  geom_segment(data = elev_table2, aes(x = seg_num - seg_half_width, xend = seg_num + seg_half_width, y = elev_min, yend = elev_min),
+    inherit.aes = FALSE, colour = "grey60", linewidth = 0.9) +
+  scale_fill_manual(values = c("Spring" = "#CC79A7", "Summer" = "#009E73", "Autumn" = "#F0E442", "Winter" = "#0072B2")) +
+  scale_y_continuous(name = "Elevation (m a.s.l.)", limits = c(0, 7000), breaks = seq(0, 7000, by = 1000)) +
+  scale_x_discrete(name = "Population") + 
+  theme_minimal() +
+  theme(legend.position = "bottom", aspect.ratio = 1)
+
+# General altitude data.
+
+alt_stats <- list(mean = mean(data_enriched$Altitude, na.rm = TRUE), 
+                  sd   = sd(data_enriched$Altitude, na.rm = TRUE), 
+                  n    = sum(!is.na(data_enriched$Altitude)))
+alt_stats$se <- alt_stats$sd / sqrt(alt_stats$n)
+
+t_val <- qt(0.975, df = alt_stats$n - 1)
+alt_ci <- c(lower = alt_stats$mean - t_val * alt_stats$se, upper = alt_stats$mean + t_val * alt_stats$se)
+
+alt_stats
+alt_ci
+
+```

@@ -1,0 +1,30 @@
+Package: BioDyn
+Type: Package
+Title: BioDyn: Spatiotemporal and Environmental Exploration for Biodiversity
+        Occurrence Data
+Version: 0.1.0
+Authors@R: c(
+    person("Tiago A.", "Herrador", email = "tiago.alejo.h@hotmail.com",
+           role = c("aut", "cre")),
+    person("Carla A.", "Reati", role = "aut")
+  )
+Description: Provides tools to support reproducible workflows for the
+  spatiotemporal exploration of species occurrence data in ecology and
+  biogeography. The package integrates data ingestion, construction of
+  presence-absence datasets, spatial filtering and user-defined
+  segmentation, environmental raster enrichment, and diagnostic
+  visualization. BioDyn helps users assess sampling effort and bias and
+  explore intra-specific spatial and temporal patterns prior to formal
+  ecological modeling.
+License: MIT + file LICENSE
+URL: https://github.com/tiagoherrador/BioDyn
+BugReports: https://github.com/tiagoherrador/BioDyn/issues
+Depends: R (>= 4.1.0)
+Imports: dplyr, ggplot2, leaflet, leaflet.extras, RANN, RColorBrewer,
+        readr, rlang, scales, sf, terra
+Suggests: data.table, exactextractr, htmlwidgets, knitr, plotly, raster,
+        rmarkdown, testthat (>= 3.0.0), withr
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+RoxygenNote: 7.3.3
