@@ -31,7 +31,7 @@ plot_effort <- function(data,
                         top_n = 10,
                         min_total_count = 5,
                         verbose = FALSE) {
-  for (pkg in c("ggplot2", "dplyr", "scales")) {
+  for (pkg in c("ggplot2", "dplyr", "scales", "tidyr")) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       stop(sprintf("Package '%s' is required.", pkg))
     }

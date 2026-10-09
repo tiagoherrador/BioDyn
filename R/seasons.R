@@ -74,15 +74,15 @@ split_dates <- function(x, preview = TRUE) {
     "%Y%m%d"
   )
 
-  # Each value is tried against the formats in order, so one unreadable date
-  # becomes NA instead of making the whole column fail (as.POSIXct() with
-  # `tryFormats` picks one format from the first non-NA value and errors if
-  # that value matches none).
-  parsed <- as.POSIXct(rep(NA_real_, length(date_chr)), origin = "1970-01-01", tz = "UTC")
-  for (fmt in try_formats) {
-    todo <- is.na(parsed) & !is.na(date_chr)
-    if (!any(todo)) break
-    parsed[todo] <- suppressWarnings(as.POSIXct(date_chr[todo], format = fmt, tz = "UTC"))
+  parsed <- suppressWarnings(
+    as.POSIXct(date_chr, tz = "UTC", tryFormats = try_formats)
+  )
+
+  # If any remain NA, try as.Date conversion (returns Date), then coerce to POSIXct
+  still_na <- is.na(parsed) & !is.na(date_chr)
+  if (any(still_na)) {
+    parsed_date <- suppressWarnings(as.Date(date_chr[still_na], tryFormats = c("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y")))
+    parsed[still_na] <- as.POSIXct(parsed_date, tz = "UTC")
   }
 
   df[["OBSERVATION DATE"]] <- parsed

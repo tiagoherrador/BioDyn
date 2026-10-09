@@ -71,6 +71,16 @@ Summer and winter records hardly overlap in temperature, which agrees with the a
 
 ## Install
 
+BioDyn is distributed from Zenodo ([doi:10.5281/zenodo.19055001](https://doi.org/10.5281/zenodo.19055001)). Download the source package `BioDyn_0.1.0.tar.gz` from there and install it from R:
+
+```r
+install.packages("path/to/BioDyn_0.1.0.tar.gz", repos = NULL, type = "source")
+```
+
+The same Zenodo record has the example dataset of the article (`Example_nrufiventris.rar`).
+
+This GitHub repository has the same code, so you can also install it from here:
+
 ```r
 # install.packages("remotes")
 remotes::install_github("tiagoherrador/BioDyn")
@@ -114,9 +124,9 @@ The tests use tiny hand-made tables and need no real data.
 - **`plot_effort()` only looks at latitude.**
 - This is version 0.1.0 of a young package.
 
-## What I changed from the archived version
+## What this repository adds to the archived version
 
-The code is the version archived on Zenodo, with these differences: `split_dates()` now turns an unreadable date into `NA` (it failed with an error before, although its documentation promised `NA`); `tidyr` is no longer listed as a dependency, since nothing used it; and the package now has tests, continuous integration, an MIT licence and the authors' details, which the archived `DESCRIPTION` still had as placeholders.
+The package code (`R/`, `man/`, `NAMESPACE`) is exactly the one archived on Zenodo. What this repository adds around it: tests (with tiny hand-made tables, no real data), continuous integration, the example scripts in `inst/scripts`, this README, the authors' details and the MIT licence in `DESCRIPTION`.
 
 ## Authors and licence
 

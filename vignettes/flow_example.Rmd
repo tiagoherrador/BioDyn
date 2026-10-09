@@ -19,7 +19,8 @@ knitr::opts_chunk$set(
 
 ```{r libraries}
 # Load BioDyn package
-remotes::install_github("tiagoherrador/BioDyn")
+# Install from the source package on Zenodo (doi:10.5281/zenodo.19055001):
+# install.packages("path/to/BioDyn_0.1.0.tar.gz", repos = NULL, type = "source")
 library(BioDyn)
 ```
 

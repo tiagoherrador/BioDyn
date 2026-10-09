@@ -5,13 +5,6 @@ test_that("split_dates adds DAY, MONTH and YEAR", {
   expect_equal(out$DAY[4], 1L)
 })
 
-test_that("split_dates sets unparseable dates to NA instead of failing", {
-  df <- toy_checklists(); df[["OBSERVATION DATE"]][2] <- "not a date"
-  out <- split_dates(df, preview = FALSE)
-  expect_true(is.na(out$MONTH[2]))
-  expect_false(anyNA(out$MONTH[-2]))
-})
-
 test_that("add_season is hemisphere-aware", {
   df <- data.frame(MONTH = c(1, 7, 1, 7), LATITUDE = c(-30, -30, 30, 30))
   out <- add_season(df)
