@@ -6,3 +6,5 @@
 *.tar.gz
 /data_*.csv
 /checklists_*.csv
+Rplots.pdf
+segment_*_map.html
