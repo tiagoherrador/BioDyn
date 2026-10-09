@@ -33,6 +33,10 @@ It is a *diagnostic* tool. It does not fit models and it does not prove anything
 
 The steps do not have to be run in order, and every function takes and returns a plain table, so you can stop, branch or repeat anywhere. If you only have presence records (no checklists), everything works except `build_data()` and `plot_effort()`, which need the absences.
 
+The article draws the whole workflow like this. It has two paths: if you only have presences (path A) the data go straight to the spatial filters; if you have checklists (path B) `build_data()` first builds the presence/absence table. Dotted boxes are optional steps.
+
+<p align="center"><img src="assets/paper_fig1_workflow.png" width="560" alt="Diagram of the BioDyn workflow, from the article"></p>
+
 ## An example: a migratory bird in Argentina
 
 The article uses the chocolate-vented tyrant (*Neoxolmis rufiventris*), which breeds in Patagonia in the austral summer and winters in the Pampas. I re-ran the whole workflow on that example with this version of the package. **Every figure below is the direct output of a BioDyn function** (the script is [`inst/scripts/step2_figures.R`](inst/scripts/step2_figures.R)).
@@ -96,6 +100,20 @@ And the temperature one plot per segment (`segment = TRUE`), which shows that in
 <td><img src="assets/pv_bio01_segment_3.png" width="265" alt="Temperature by season in segment 3"></td>
 </tr>
 </table>
+
+## Figures from the article
+
+These are the figures of the article, made with BioDyn on the same example (the chocolate-vented tyrant). The three segments (north, centre, south) are the ones the authors drew.
+
+**Filtering and segmentation (Fig. 2).** (A) `filter_ecoregion()`: records kept inside the ecoregions. (B) `filter_radius()`: checklists within 20 km of a presence. (C) The three segments drawn with `create_segments()`. (D) Number of records in each segment, from `filter_pol()`.
+
+<img src="assets/paper_fig2_filtering.png" width="760" alt="Figure 2 of the article: filtering and segmentation">
+
+**Exploring seasons, elevation and climate (Fig. 3).** (A) Sampling effort and presences by latitude and season, from `plot_effort()`. (B) Elevation of the records by season in each segment; the grey lines are the lowest and highest elevation available in each segment, from `elev_minmax()`. (C) Latitude of the records, summer and winter. (D) Annual mean temperature (`bio01`) of the records, summer and winter. (E) Records per month in each segment. (F) Latitude of the records by season in each segment.
+
+<img src="assets/paper_fig3_exploration.png" width="760" alt="Figure 3 of the article: seasonal patterns of the records">
+
+Figures from: Herrador et al. (2026), *Biodiversity Informatics* 20, 275–285.
 
 ## Install
 
