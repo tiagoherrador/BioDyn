@@ -48,6 +48,15 @@ The article uses the chocolate-vented tyrant (*Neoxolmis rufiventris*), which br
 </tr>
 </table>
 
+**Drawing the segments.** `create_segments()` opens an interactive map with the records, and you draw the polygons you want with the toolbar (left); the save button (top right) exports them as a GeoJSON file. `filter_pol()` then reads that file and gives another interactive map where every segment has its own colour. Left: the three rectangles drawn in `create_segments()`. Right: the result in `filter_pol()`.
+
+<table>
+<tr>
+<td><img src="assets/create_segments_map.png" width="400" alt="Interactive map of create_segments() with three drawn rectangles"></td>
+<td><img src="assets/filter_pol_map.png" width="400" alt="Interactive map of filter_pol() with the records coloured by segment"></td>
+</tr>
+</table>
+
 **`filter_pol()`** assigns each record to the segment that contains it (the segments are the polygons you draw with `create_segments()`; here, three rectangles I drew for the example) and draws a summary of how many records fell in each:
 
 <table>
@@ -97,13 +106,6 @@ install.packages("path/to/BioDyn_0.1.0.tar.gz", repos = NULL, type = "source")
 ```
 
 The same Zenodo record has the example dataset of the article (`Example_nrufiventris.rar`).
-
-This GitHub repository has the same code, so you can also install it from here:
-
-```r
-# install.packages("remotes")
-remotes::install_github("tiagoherrador/BioDyn")
-```
 
 R ≥ 4.1. It uses `sf`, `terra`, `ggplot2`, `dplyr` and `leaflet`. `elev_minmax()` also needs `raster` and `exactextractr`, and the interactive maps need `plotly` and `htmlwidgets`.
 
