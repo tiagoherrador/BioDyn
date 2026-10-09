@@ -39,81 +39,19 @@ The article draws the whole workflow like this. It has two paths: if you only ha
 
 ## An example: a migratory bird in Argentina
 
-The article uses the chocolate-vented tyrant (*Neoxolmis rufiventris*), which breeds in Patagonia in the austral summer and winters in the Pampas. I re-ran the whole workflow on that example with this version of the package. **Every figure below is the direct output of a BioDyn function** (the script is [`inst/scripts/step2_figures.R`](inst/scripts/step2_figures.R)).
+The article uses the chocolate-vented tyrant (*Neoxolmis rufiventris*), which breeds in Patagonia in the austral summer and winters in the Pampas. All the figures below are from the article (Herrador et al. 2026, *Biodiversity Informatics* 20, 275–285) and were made with BioDyn.
 
-**The numbers of the article are reproduced.** From the eBird files (3,329 presence records and 1,010,756 checklists for Argentina), the effort filter (≤ 10 km, ≤ 10 observers, ≤ 300 min, stationary or travelling) keeps **814 records and 280,958 checklists**, the same as in the article.
+**Cleaning and cutting the data.** From the eBird files (3,329 presence records and 1,010,756 checklists for Argentina), the effort filter (≤ 10 km, ≤ 10 observers, ≤ 300 min, stationary or travelling) keeps **814 records and 280,958 checklists**; I re-ran it with this version of the package and got the same numbers. Then the records are cut by ecoregion and by distance to the presences, and split into three segments (north, centre, south) drawn on an interactive map:
 
-**`filter_ecoregion()`** (left) keeps the records inside the chosen ecoregions, here the Patagonian steppe and the Humid Pampas: teal dots are kept, faint grey dots were left out. **`filter_radius()`** (right) keeps only the checklists within 20 km of a presence, so that "absences" come from places where the species could have been seen: grey dots are the checklists that were dropped and the black outline is the union of the 20 km buffers.
+(A) `filter_ecoregion()` keeps the records inside the chosen ecoregions. (B) `filter_radius()` keeps the checklists within 20 km of a presence. (C) The three segments drawn with `create_segments()`. (D) The number of records in each segment, from `filter_pol()`.
 
-<table>
-<tr>
-<td><img src="assets/filter_ecoregion.png" width="400" alt="Map drawn by filter_ecoregion()"></td>
-<td><img src="assets/filter_radius.png" width="400" alt="Map drawn by filter_radius()"></td>
-</tr>
-</table>
+<img src="assets/paper_fig2_filtering.png" width="760" alt="Filtering and segmentation of the records: ecoregion, radius, segments and records per segment">
 
-**Drawing the segments.** `create_segments()` opens an interactive map with the records, and you draw the polygons you want with the toolbar (left); the save button (top right) exports them as a GeoJSON file. `filter_pol()` then reads that file and gives another interactive map where every segment has its own colour. Left: the three rectangles drawn in `create_segments()`. Right: the result in `filter_pol()`.
+**Looking at seasons, elevation and climate.** (A) `plot_effort()`: for each degree of latitude, the share of the checklists (left) and of the presences (right) that fall in each season. (B) Elevation of the records by season in each segment; the grey lines are the lowest and highest elevation available in each segment, from `elev_minmax()`. (C) Latitude of the records in summer and winter. (D) Annual mean temperature (CHELSA `bio01`) of the records in summer and winter. (E) Records per month in each segment. (F) Latitude of the records by season in each segment.
 
-<table>
-<tr>
-<td><img src="assets/create_segments_map.png" width="400" alt="Interactive map of create_segments() with three drawn rectangles"></td>
-<td><img src="assets/filter_pol_map.png" width="400" alt="Interactive map of filter_pol() with the records coloured by segment"></td>
-</tr>
-</table>
+<img src="assets/paper_fig3_exploration.png" width="760" alt="Seasonal patterns of the records: effort, elevation, latitude, temperature and months">
 
-**`filter_pol()`** assigns each record to the segment that contains it (the segments are the polygons you draw with `create_segments()`; here, three rectangles I drew for the example) and draws a summary of how many records fell in each:
-
-<table>
-<tr>
-<td><img src="assets/filter_pol_bars.png" width="400" alt="Number of observations per segment, drawn by filter_pol()"></td>
-<td><img src="assets/filter_pol_dots.png" width="400" alt="Dot plot of the observations per segment, drawn by filter_pol()"></td>
-</tr>
-</table>
-
-**`plot_effort()`** shows, for each degree of latitude, what share of the checklists (left) and of the presences (right) fell in each season:
-
-<img src="assets/plot_effort.png" width="620" alt="Sampling effort and presences by latitude and season, drawn by plot_effort()">
-
-On the left every season is represented at almost every latitude, so effort is fairly even through the year. On the right, the northern degrees are mostly autumn and winter and the southern ones spring and summer. Since sampling did not itself shift with the seasons, that change is more likely to be the bird than the observers. This is exactly the check `plot_effort()` is for.
-
-**`plot_variable()`** draws any variable of the table by season, here the annual mean temperature (CHELSA `bio01`) at the records, extracted with `extract_rasters()`:
-
-<img src="assets/plot_variable_bio01.png" width="480" alt="Annual mean temperature of summer and winter records, drawn by plot_variable()">
-
-Summer and winter records hardly overlap in temperature, which agrees with the article, but, as the article warns, this mostly reflects that the bird is at different latitudes in each season, not that it picks different climates.
-
-`plot_variable()` works with any numeric column of the table (`var = "bio01"`, `"LATITUDE"`, `"Altitude"`...), colours the records by season, and has a few options: `type` (`"density"`, `"histogram"`, `"boxplot"` or `"line"`), `seasons` (which seasons to show) and `segment = TRUE`, which draws one plot per segment. The same temperature as a histogram, and the latitude of the records as a histogram:
-
-<table>
-<tr>
-<td><img src="assets/pv_bio01_histogram.png" width="400" alt="Histogram of annual mean temperature by season, drawn by plot_variable()"></td>
-<td><img src="assets/pv_latitude_histogram.png" width="400" alt="Histogram of latitude by season, drawn by plot_variable()"></td>
-</tr>
-</table>
-
-And the temperature one plot per segment (`segment = TRUE`), which shows that in the northern segment (left) the summer and winter records come from clearly different temperatures:
-
-<table>
-<tr>
-<td><img src="assets/pv_bio01_segment_1.png" width="265" alt="Temperature by season in segment 1"></td>
-<td><img src="assets/pv_bio01_segment_2.png" width="265" alt="Temperature by season in segment 2"></td>
-<td><img src="assets/pv_bio01_segment_3.png" width="265" alt="Temperature by season in segment 3"></td>
-</tr>
-</table>
-
-## Figures from the article
-
-These are the figures of the article, made with BioDyn on the same example (the chocolate-vented tyrant). The three segments (north, centre, south) are the ones the authors drew.
-
-**Filtering and segmentation (Fig. 2).** (A) `filter_ecoregion()`: records kept inside the ecoregions. (B) `filter_radius()`: checklists within 20 km of a presence. (C) The three segments drawn with `create_segments()`. (D) Number of records in each segment, from `filter_pol()`.
-
-<img src="assets/paper_fig2_filtering.png" width="760" alt="Figure 2 of the article: filtering and segmentation">
-
-**Exploring seasons, elevation and climate (Fig. 3).** (A) Sampling effort and presences by latitude and season, from `plot_effort()`. (B) Elevation of the records by season in each segment; the grey lines are the lowest and highest elevation available in each segment, from `elev_minmax()`. (C) Latitude of the records, summer and winter. (D) Annual mean temperature (`bio01`) of the records, summer and winter. (E) Records per month in each segment. (F) Latitude of the records by season in each segment.
-
-<img src="assets/paper_fig3_exploration.png" width="760" alt="Figure 3 of the article: seasonal patterns of the records">
-
-Figures from: Herrador et al. (2026), *Biodiversity Informatics* 20, 275–285.
+**What it shows.** In panel A (left) every season is represented at most latitudes, so sampling effort is fairly even through the year. In panel A (right) the northern degrees are mostly autumn and winter records and the southern ones spring and summer. Since the checklists did not themselves shift with the seasons, that change is more likely to be the bird than the observers. This is exactly the check `plot_effort()` is for. Summer and winter records also hardly overlap in temperature (D), but, as the article warns, this mostly reflects that the bird is at different latitudes in each season, not that it chooses different climates.
 
 ## Install
 
@@ -145,7 +83,7 @@ seasonal <- add_season(split_dates(near))
 plot_effort(seasonal)
 ```
 
-The full walk-through, from raw eBird files to every plot, is the vignette: `vignette("flow_example", package = "BioDyn")`. The scripts in [`inst/scripts`](inst/scripts) are the ones I used for the numbers and figures above.
+The full walk-through, from raw eBird files to every plot, is the vignette: `vignette("flow_example", package = "BioDyn")`. The script [`inst/scripts/step1_filters.R`](inst/scripts/step1_filters.R) reproduces the record counts of the example above.
 
 ## Data
 
@@ -166,7 +104,7 @@ The tests use tiny hand-made tables and need no real data.
 
 ## What this repository adds to the archived version
 
-The package code (`R/`, `man/`, `NAMESPACE`) is exactly the one archived on Zenodo. What this repository adds around it: tests (with tiny hand-made tables, no real data), continuous integration, the example scripts in `inst/scripts`, this README, the authors' details and the MIT licence in `DESCRIPTION`.
+The package code (`R/`, `man/`, `NAMESPACE`) is exactly the one archived on Zenodo. What this repository adds around it: tests (with tiny hand-made tables, no real data), continuous integration, a script that reproduces the counts of the example, this README, the authors' details and the MIT licence in `DESCRIPTION`.
 
 ## Authors and licence
 
