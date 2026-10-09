@@ -22,18 +22,7 @@ It is a *diagnostic* tool. It does not fit models and it does not prove anything
 
 ## The workflow
 
-| Step | Functions | What it does |
-|---|---|---|
-| 1. Presence/absence | `build_data()` | Crosses eBird sightings with the checklist file: a checklist with the species is `Present`, the rest are `Absent` |
-| 2. Effort filter | `filter_ebird()` | Keeps checklists within a maximum distance, number of observers and duration, for chosen protocols, complete checklists only, no duplicates |
-| 3. Spatial filter and segments | `filter_ecoregion()`, `filter_radius()`, `create_segments()`, `filter_pol()` | Keep points inside an ecoregion (with optional buffer); keep absences within X km of a presence; draw polygons on an interactive map and assign each record to a segment |
-| 4. Seasons | `split_dates()`, `add_season()`, `filter_season()` | Day / month / year, and a season that depends on the hemisphere of each record |
-| 5. Environment | `extract_rasters()`, `elev_minmax()` | Raster values (e.g. CHELSA climate, a DEM) at each point; minimum and maximum elevation available inside each segment |
-| 6. Plots | `plot_effort()`, `plot_variable()`, `plot_altitude()`, `create_ggplot_visualizations()`, `create_segment_interactive_maps()` | The diagnostic plots |
-
-The steps do not have to be run in order, and every function takes and returns a plain table, so you can stop, branch or repeat anywhere. If you only have presence records (no checklists), everything works except `build_data()` and `plot_effort()`, which need the absences.
-
-The article draws the whole workflow like this. It has two paths: if you only have presences (path A) the data go straight to the spatial filters; if you have checklists (path B) `build_data()` first builds the presence/absence table. Dotted boxes are optional steps.
+The steps do not have to be run in order, and every function takes and returns a plain table, so you can stop, branch or repeat anywhere. The diagram shows the whole workflow, from the article. It has two paths: if you only have presence records (path A) the data go straight to the spatial filters; if you have checklists (path B) `build_data()` first builds the presence/absence table from the eBird files, which lets the package tell a real absence from a place nobody visited. Dotted boxes are optional steps. Everything works with presences only, except `build_data()` and `plot_effort()`, which need the absences.
 
 <p align="center"><img src="assets/paper_fig1_workflow.png" width="560" alt="Diagram of the BioDyn workflow, from the article"></p>
 
