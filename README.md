@@ -69,6 +69,25 @@ On the left every season is represented at almost every latitude, so effort is f
 
 Summer and winter records hardly overlap in temperature, which agrees with the article, but, as the article warns, this mostly reflects that the bird is at different latitudes in each season, not that it picks different climates.
 
+`plot_variable()` works with any numeric column of the table (`var = "bio01"`, `"LATITUDE"`, `"Altitude"`...), colours the records by season, and has a few options: `type` (`"density"`, `"histogram"`, `"boxplot"` or `"line"`), `seasons` (which seasons to show) and `segment = TRUE`, which draws one plot per segment. The same temperature as a histogram, and the latitude of the records as a histogram:
+
+<table>
+<tr>
+<td><img src="assets/pv_bio01_histogram.png" width="400" alt="Histogram of annual mean temperature by season, drawn by plot_variable()"></td>
+<td><img src="assets/pv_latitude_histogram.png" width="400" alt="Histogram of latitude by season, drawn by plot_variable()"></td>
+</tr>
+</table>
+
+And the temperature one plot per segment (`segment = TRUE`), which shows that in the northern segment (left) the summer and winter records come from clearly different temperatures:
+
+<table>
+<tr>
+<td><img src="assets/pv_bio01_segment_1.png" width="265" alt="Temperature by season in segment 1"></td>
+<td><img src="assets/pv_bio01_segment_2.png" width="265" alt="Temperature by season in segment 2"></td>
+<td><img src="assets/pv_bio01_segment_3.png" width="265" alt="Temperature by season in segment 3"></td>
+</tr>
+</table>
+
 ## Install
 
 BioDyn is distributed from Zenodo ([doi:10.5281/zenodo.19055001](https://doi.org/10.5281/zenodo.19055001)). Download the source package `BioDyn_0.1.0.tar.gz` from there and install it from R:
@@ -122,6 +141,7 @@ The tests use tiny hand-made tables and need no real data.
 - **The effort filter is as good as its thresholds.** The defaults follow Johnston et al. (2021) but suit some questions better than others.
 - **`filter_ebird()` removes duplicates by date and latitude.** That is quick, but two different checklists on the same day at the same latitude count as duplicates.
 - **`plot_effort()` only looks at latitude.**
+- **With recent versions of `ggplot2`, `plot_variable()` fails for `type = "line"` and for `type = "boxplot"` with seasons**; `"density"` and `"histogram"` work.
 - This is version 0.1.0 of a young package.
 
 ## What this repository adds to the archived version
