@@ -35,43 +35,39 @@ The steps do not have to be run in order, and every function takes and returns a
 
 ## An example: a migratory bird in Argentina
 
-The article uses the chocolate-vented tyrant (*Neoxolmis rufiventris*), which breeds in Patagonia in the austral summer and winters in the Pampas. I re-ran the whole workflow on that example with this version of the package. **Every figure below is the direct output of a BioDyn function** (the script is [`inst/scripts/step2_figures.R`](inst/scripts/step2_figures.R)); I did not draw anything by hand.
+The article uses the chocolate-vented tyrant (*Neoxolmis rufiventris*), which breeds in Patagonia in the austral summer and winters in the Pampas. I re-ran the whole workflow on that example with this version of the package. **Every figure below is the direct output of a BioDyn function** (the script is [`inst/scripts/step2_figures.R`](inst/scripts/step2_figures.R)).
 
 **The numbers of the article are reproduced.** From the eBird files (3,329 presence records and 1,010,756 checklists for Argentina), the effort filter (≤ 10 km, ≤ 10 observers, ≤ 300 min, stationary or travelling) keeps **814 records and 280,958 checklists**, the same as in the article.
 
-**`filter_ecoregion()`** keeps the records inside the chosen ecoregions (here the Patagonian steppe and the Humid Pampas). Teal dots are kept, faint grey dots were left out:
+**`filter_ecoregion()`** (left) keeps the records inside the chosen ecoregions, here the Patagonian steppe and the Humid Pampas: teal dots are kept, faint grey dots were left out. **`filter_radius()`** (right) keeps only the checklists within 20 km of a presence, so that "absences" come from places where the species could have been seen: grey dots are the checklists that were dropped and the black outline is the union of the 20 km buffers.
 
-![Map drawn by filter_ecoregion()](assets/filter_ecoregion.png)
+<table>
+<tr>
+<td><img src="assets/filter_ecoregion.png" width="400" alt="Map drawn by filter_ecoregion()"></td>
+<td><img src="assets/filter_radius.png" width="400" alt="Map drawn by filter_radius()"></td>
+</tr>
+</table>
 
-**`filter_radius()`** keeps only the checklists within 20 km of a presence, so that "absences" come from places where the species could have been seen. Grey dots are the checklists that were dropped, the black outline is the union of the 20 km buffers:
+**`filter_pol()`** assigns each record to the segment that contains it (the segments are the polygons you draw with `create_segments()`; here, three rectangles I drew for the example) and draws a summary of how many records fell in each:
 
-![Map drawn by filter_radius()](assets/filter_radius.png)
-
-**`filter_pol()`** assigns each record to the segment that contains it (the segments are the polygons you draw with `create_segments()`) and draws a summary:
-
-![Number of observations per segment, drawn by filter_pol()](assets/filter_pol_bars.png)
-
-![Dot plot of the observations per segment, drawn by filter_pol()](assets/filter_pol_dots.png)
+<table>
+<tr>
+<td><img src="assets/filter_pol_bars.png" width="400" alt="Number of observations per segment, drawn by filter_pol()"></td>
+<td><img src="assets/filter_pol_dots.png" width="400" alt="Dot plot of the observations per segment, drawn by filter_pol()"></td>
+</tr>
+</table>
 
 **`plot_effort()`** shows, for each degree of latitude, what share of the checklists (left) and of the presences (right) fell in each season:
 
-![Sampling effort and presences by latitude and season, drawn by plot_effort()](assets/plot_effort.png)
+<img src="assets/plot_effort.png" width="620" alt="Sampling effort and presences by latitude and season, drawn by plot_effort()">
 
 On the left every season is represented at almost every latitude, so effort is fairly even through the year. On the right, the northern degrees are mostly autumn and winter and the southern ones spring and summer. Since sampling did not itself shift with the seasons, that change is more likely to be the bird than the observers. This is exactly the check `plot_effort()` is for.
 
 **`plot_variable()`** draws any variable of the table by season, here the annual mean temperature (CHELSA `bio01`) at the records, extracted with `extract_rasters()`:
 
-![Annual mean temperature of summer and winter records, drawn by plot_variable()](assets/plot_variable_bio01.png)
+<img src="assets/plot_variable_bio01.png" width="480" alt="Annual mean temperature of summer and winter records, drawn by plot_variable()">
 
 Summer and winter records hardly overlap in temperature, which agrees with the article, but, as the article warns, this mostly reflects that the bird is at different latitudes in each season, not that it picks different climates.
-
-The interactive map where you draw the segments (`create_segments()`) and the elevation plot (`plot_altitude()`) need an interactive session or the 2 GB elevation model, so I did not include them here.
-
-### What I could not reproduce exactly
-
-- **Ecoregion filter.** The article reports 69 presence records removed; with the two ecoregions drawn in its Fig. 2A (Patagonian steppe and Humid Pampas) I get **73**. The selection of ecoregions used for the article is not in my files, so a small difference is expected.
-- **Segments.** The three segments in the article were drawn by hand on the interactive map and I do not have that file. I drew three rectangles by eye from the article's figure; they give 131 / 16 / 592 records (the article's figure shows about 140 / 12 / 595). The segment figures in this README use those, so treat them as an illustration.
-- **The radius.** The article says 20 km and its example vignette uses 30 km; I used 20 km.
 
 ## Install
 
