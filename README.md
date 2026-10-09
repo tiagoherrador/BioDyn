@@ -8,17 +8,19 @@ It is described in the article *"BioDyn: A tool for the spatiotemporal analysis 
 
 ## Why it exists, and what it is for
 
-Citizen-science platforms hold millions of records, but they are uneven: some places and months are visited far more than others. A map of points can then show *where observers were* instead of *where the species is*. This gets worse when you care about **movements**, such as a migratory species whose northern and southern populations are in different places in different seasons.
+Large biodiversity databases (eBird, GBIF, iNaturalist, VertNet) now hold billions of records, but more data does not automatically mean more knowledge. The records carry biases and gaps, and sampling effort, temporal resolution and environmental coverage are very uneven. That leaves holes in what we know about where species actually occur, especially when a distribution is treated as something that changes over time and not as a fixed map.
 
-BioDyn puts the usual steps for this in one place, so they are reproducible and easy to repeat on another species:
+Time has received less attention than space, particularly *within* a single species, where seasonal changes, differences between populations and migration matter a lot. Studying them takes several stages (cleaning the data, cutting it into spatial segments, linking each record to the environment, plotting), and these are usually spread over different tools.
 
-- build a **presence/absence table** from eBird, so that an *absence* means "someone looked and did not see it", not "nobody went there";
-- **filter the records by sampling effort** (distance, duration, number of observers, protocol);
-- **cut the area** with an ecoregion, a radius around the presences, or **segments you draw yourself** on a map;
-- add the **season** (aware of the hemisphere) and **environmental values** (climate, elevation) at each record;
-- draw the **diagnostic plots**: sampling effort along latitude, records per month, climate and elevation by season.
+BioDyn brings those stages into one reproducible and flexible workflow to **explore occurrence records in space, seasons and environment before any formal modelling**, with a focus on seasonal and between-year variation within a species. With it you can:
 
-It is a *diagnostic* tool. It does not fit models and it does not prove anything about migration: it helps you see the pattern, and see whether sampling effort could be fooling you.
+- build a **presence/absence table** from eBird, so a real absence is told apart from a place that was never sampled;
+- **filter the records by sampling effort**, following the guidelines of Johnston et al. (2021);
+- **cut the area** with an ecoregion, a radius around the presences, or **segments you draw yourself** on an interactive map;
+- add the **season** of each record and **environmental values** (climate, elevation), including the elevation range available in each segment;
+- draw **diagnostic plots** of sampling effort, seasonal patterns and environmental distributions, and interactive maps.
+
+It is a *diagnostic* tool. It helps you assess data coverage, spot sampling biases and information gaps, and form hypotheses about seasonal and spatial structure before modelling.
 
 ## The workflow
 
@@ -82,18 +84,14 @@ The tests use tiny hand-made tables and need no real data.
 
 ## Things to keep in mind
 
-- **It only works with occurrence data.** There is no abundance, movement or genetic information, so conclusions about populations or migratory connections are indirect.
-- **Drawing segments is a judgement call.** That is the point (you bring your knowledge of the species), but two people can draw different segments.
-- **`build_data()` treats every row of the sightings file as a detection of your species.** Give it a sightings file for one species only.
-- **The effort filter is as good as its thresholds.** The defaults follow Johnston et al. (2021) but suit some questions better than others.
-- **`filter_ebird()` removes duplicates by date and latitude.** That is quick, but two different checklists on the same day at the same latitude count as duplicates.
-- **`plot_effort()` only looks at latitude.**
-- **With recent versions of `ggplot2`, `plot_variable()` fails for `type = "line"` and for `type = "boxplot"` with seasons**; `"density"` and `"histogram"` work.
-- This is version 0.1.0 of a young package.
+These are the limitations the article points out:
 
-## What this repository adds to the archived version
-
-The package code (`R/`, `man/`, `NAMESPACE`) is exactly the one archived on Zenodo. What this repository adds around it: tests (with tiny hand-made tables, no real data), continuous integration, a script that reproduces the counts of the example, this README, the authors' details and the MIT licence in `DESCRIPTION`.
+- **It works only with occurrence data.** It does not include demographic information, movement trajectories, abundance estimates or genetic structure, so conclusions about population differentiation or migratory connectivity are indirect and should be read with caution.
+- **Drawing segments involves some subjectivity.** The interactive segmentation is flexible and lets you use your knowledge of the species, but segments defined by expert criteria depend on who draws them.
+- **The diagnostics are visual.** BioDyn does not yet give quantitative bias metrics, and it has no interface yet with species-distribution, occupancy or niche modelling frameworks.
+- **Presence-only data are supported, with one limit.** Everything works without absences except `build_data()` and `plot_effort()`, which need the inferred absences and the sampling effort.
+- **`plot_effort()` looks only at latitude,** because the package focuses on seasonal and migratory dynamics.
+- **Climate differences between seasons can be misleading.** If a species is at different latitudes in each season, differences in the climate of its records partly reflect that, and should be interpreted with caution.
 
 ## Authors and licence
 
